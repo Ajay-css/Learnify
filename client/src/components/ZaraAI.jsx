@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { sendZaraMessage } from '../services/zara.service';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import zara from "../assets/zara.jpg"
 
 // ── Sub-components ────────────────────────────────────────────────────
 
@@ -10,10 +11,28 @@ const ZaraAvatar = ({ size = 'md', animated = false }) => {
     const sizes = { sm: 'w-7 h-7', md: 'w-10 h-10', lg: 'w-14 h-14' };
     return (
         <div className={`${sizes[size]} relative flex-shrink-0`}>
-            <div className={`absolute inset-0 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 ${animated ? 'animate-pulse' : ''}`} />
-            <div className="absolute inset-0 rounded-full flex items-center justify-center">
-                <span className="font-bold text-white text-xs">Z</span>
+            {/* Soft glow background */}
+            <div className={`absolute -inset-0.5 rounded-full bg-gradient-to-br from-violet-400/20 to-indigo-500/20 blur-sm ${animated ? 'animate-pulse' : ''}`} />
+            
+            <div className="relative w-full h-full rounded-full overflow-hidden border-2 border-white/80 shadow-sm bg-slate-100 flex items-center justify-center">
+                <img 
+                    src={zara} 
+                    alt="Zara" 
+                    className="w-full h-full object-cover object-center scale-110" 
+                    onError={(e) => {
+                        e.target.style.display = 'none';
+                        e.target.nextSibling.style.display = 'flex';
+                    }}
+                />
+                <div className="hidden absolute inset-0 items-center justify-center bg-gradient-to-br from-violet-500 to-indigo-600">
+                    <span className="font-bold text-white text-xs">Z</span>
+                </div>
             </div>
+
+            {/* Online indicator dot for specific sizes if needed, or just the ring pulse */}
+            {animated && (
+                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 border-2 border-white rounded-full group-hover:scale-110 transition-transform" />
+            )}
         </div>
     );
 };
