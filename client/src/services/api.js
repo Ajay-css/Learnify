@@ -1,12 +1,22 @@
 import axios from 'axios';
 
+const getBaseURL = () => {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (!envUrl) return '/api';
+
+  // Ensure it ends with /api if not already present
+  // This supports both "https://server.vercel.app" and "https://server.vercel.app/api"
+  return envUrl.endsWith('/api') ? envUrl : `${envUrl.replace(/\/$/, '')}/api`;
+};
+
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api',
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json',
   },
   timeout: 15000,
 });
+
 
 // Response interceptor for error handling and data validation
 api.interceptors.response.use(
