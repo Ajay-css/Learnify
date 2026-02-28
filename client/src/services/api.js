@@ -8,4 +8,20 @@ const api = axios.create({
   timeout: 15000,
 });
 
+// Response interceptor for error handling and data validation
+api.interceptors.response.use(
+  (response) => {
+    // Check if the response is actually JSON
+    const contentType = response.headers['content-type'];
+    if (contentType && !contentType.includes('application/json')) {
+      return Promise.reject(new Error('Invalid response format (not JSON)'));
+    }
+    return response;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
 export default api;
+

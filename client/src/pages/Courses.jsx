@@ -13,9 +13,14 @@ export default function Courses() {
     const fetchCourses = async () => {
       try {
         const data = await courseService.getAllCourses();
-        setCourses(data);
+        if (Array.isArray(data)) {
+          setCourses(data);
+        } else {
+          console.error('Expected array of courses, got:', data);
+          setError('Invalid data received from server.');
+        }
       } catch (err) {
-        setError('Failed to fetch courses. Please try again later.');
+        setError(err.message || 'Failed to fetch courses. Please try again later.');
         console.error(err);
       } finally {
         setLoading(false);
@@ -23,6 +28,7 @@ export default function Courses() {
     };
     fetchCourses();
   }, []);
+
 
   if (loading) return <Loading />;
 

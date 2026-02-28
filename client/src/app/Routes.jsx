@@ -2,6 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { lazy, Suspense } from "react";
 import MainLayout from "../layout/MainLayout";
 import CourseLayout from "../layout/CourseLayout";
+import ErrorPage from "../pages/ErrorPage";
 
 // Lazy load pages for performance
 const Home = lazy(() => import("../pages/Home"));
@@ -21,6 +22,7 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: <MainLayout />,
+    errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Suspense fallback={<PageLoader />}><Home /></Suspense> },
       { path: "courses", element: <Suspense fallback={<PageLoader />}><Courses /></Suspense> },
@@ -30,9 +32,11 @@ export const router = createBrowserRouter([
   {
     path: "/course/:id",
     element: <CourseLayout />,
+    errorElement: <ErrorPage />,
     children: [
       { index: true, element: <Suspense fallback={<PageLoader />}><CourseDashboard /></Suspense> },
       { path: "learn", element: <Suspense fallback={<PageLoader />}><CourseDetails /></Suspense> }
     ]
   }
 ]);
+
