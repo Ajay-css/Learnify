@@ -8,9 +8,11 @@ export const courseService = {
       headers: {
         'Content-Type': 'multipart/form-data',
       },
+      timeout: 60000, // Long timeout for AI generation (60 seconds)
     });
     return response.data;
   },
+
 
   // Get all courses
   getAllCourses: async () => {

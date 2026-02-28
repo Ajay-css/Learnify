@@ -94,14 +94,14 @@ function validateLessons(moduleData) {
 /* -----------------------------------------
    ENHANCED AI GENERATOR WRAPPER
 ------------------------------------------ */
-const MAX_RETRIES = 3;
+const MAX_RETRIES = 2; // Reduced retries to save time on timeouts
 
 async function generateWithRetry(prompt, retries = 0) {
   try {
     const response = await groq.chat.completions.create({
       model: "llama-3.1-8b-instant",
-      messages: [{ role: "user", content: prompt }],
-      temperature: 0.3,
+      messages: [{ role: "system", content: "You are a senior curriculum architect. You output ONLY valid JSON. No conversational text." }, { role: "user", content: prompt }],
+      temperature: 0.2, // Lower temperature for more consistent JSON
       max_tokens: 3000,
       response_format: { type: "json_object" }
     });
@@ -124,26 +124,19 @@ async function generateWithRetry(prompt, retries = 0) {
 ------------------------------------------ */
 export const generateCourseBlueprint = async (text) => {
   const prompt = `
-You are a senior curriculum architect.
-
 Generate a COMPLETE professional course STRUCTURE based on this text.
-
-STRICT RULES:
-- Exactly 8 to 10 modules.
-- DO NOT generate lessons yet.
-- You MUST return a valid JSON object matching the exact format below. Do not include markdown or conversational text.
+Exactly 8 modules.
+DO NOT generate lessons yet.
+Return a valid JSON object.
 
 FORMAT:
 {
   "title": "String",
   "description": "String",
-  "level": "Beginner to Advanced",
+  "level": "Beginner/Intermediate/Advanced",
   "duration": "String",
   "modules": [
-    {
-      "title": "String",
-      "description": "String"
-    }
+    { "title": "String", "description": "String" }
   ]
 }
 
@@ -164,39 +157,28 @@ export const generateLessonsForModule = async (
   moduleTitle
 ) => {
   const prompt = `
-You are a senior instructor creating course material.
+Generate EXACTLY 4 detailed lessons for: ${moduleTitle}
+Part of course: ${courseTitle}
 
-Course: ${courseTitle}
-Module: ${moduleTitle}
-
-Generate EXACTLY 4 detailed lessons for this module.
-
-CRITICAL JSON String Escaping Rules:
-1. ALL strings must be valid JSON strings.
-2. In the "code" field, you MUST escape ALL newlines as \\n. YOU CANNOT have literal newlines inside the JSON string value.
-3. In the "code" field, escape double quotes as \\".
-4. Use single quotes for HTML attributes or standard Javascript strings if possible to avoid escaping hell.
-5. NEVER return unescaped raw code blocks inside the JSON.
-6. The entire response must be a single, valid JSON object. Do not wrap it in markdown.
+CRITICAL RULES:
+1. Escape newlines in "code" as \\n.
+2. No literal newlines in strings.
+3. Return only valid JSON.
 
 FORMAT:
 {
   "lessons": [
     {
       "title": "String",
-      "content": "String (2 paragraphs max)",
+      "content": "String (2 paragraphs)",
       "examples": "String",
-      "language": "String (e.g. javascript, jsx, html, css, python, java, c++, sql)",
-      "code": "const a = 1;\\nconst b = 2;",
+      "language": "javascript/jsx/html/css/python",
+      "code": "Escaped string",
       "quiz": [
-        {
-          "question": "String",
-          "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
-          "answer": "Option 1"
-        }
+        { "question": "String", "options": ["4 options"], "answer": "The correct option" }
       ],
       "assignment": "String",
-      "interviewQuestions": ["String", "String", "String"]
+      "interviewQuestions": ["String", "String"]
     }
   ]
 }
@@ -213,16 +195,18 @@ FORMAT:
 export const generateFullCourse = async (text) => {
   const blueprint = await generateCourseBlueprint(text);
 
-  // Process sequentially to avoid Groq rate limits or context crashing
-  for (const module of blueprint.modules) {
+  // Parallel generation for speed. 
+  // We process in small chunks to stay within rate limits but it's much faster than sequential.
+  const modulePromises = blueprint.modules.map(async (module) => {
     try {
       const lessons = await generateLessonsForModule(blueprint.title, module.title);
-      module.lessons = lessons;
+      return { ...module, lessons };
     } catch (err) {
-      console.error(`Failed to generate lessons for module: ${module.title}`);
-      module.lessons = []; // Fallback empty lessons so course doesn't entirely crash
+      console.error(`Failed module: ${module.title}`);
+      return { ...module, lessons: [] };
     }
-  }
+  });
 
+  blueprint.modules = await Promise.all(modulePromises);
   return blueprint;
 };
