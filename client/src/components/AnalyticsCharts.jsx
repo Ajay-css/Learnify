@@ -41,7 +41,7 @@ export default function AnalyticsCharts({ course }) {
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col h-80">
                 <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-6">Lessons Per Module</h3>
                 <div className="flex-1 w-full min-h-0">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                         <BarChart data={moduleData} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                             <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#94a3b8', fontSize: 12 }} dy={10} />
@@ -60,7 +60,7 @@ export default function AnalyticsCharts({ course }) {
             <div className="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col h-80">
                 <h3 className="text-sm font-bold text-slate-700 uppercase tracking-wider mb-2">Content Distribution</h3>
                 <div className="flex-1 w-full min-h-0 relative flex items-center justify-center">
-                    <ResponsiveContainer width="100%" height="100%">
+                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={0}>
                         <PieChart>
                             <Pie
                                 data={contentDistribution}
