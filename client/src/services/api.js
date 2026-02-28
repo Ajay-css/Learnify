@@ -1,13 +1,15 @@
 import axios from 'axios';
 
 const getBaseURL = () => {
-  const envUrl = import.meta.env.VITE_API_URL;
+  const envUrl = import.meta.env.VITE_API_URL || import.meta.env.VITE_SERVER;
   if (!envUrl) return '/api';
-
+  
   // Ensure it ends with /api if not already present
-  // This supports both "https://server.vercel.app" and "https://server.vercel.app/api"
-  return envUrl.endsWith('/api') ? envUrl : `${envUrl.replace(/\/$/, '')}/api`;
+  // Normalize the URL by removing trailing slash first
+  const cleanUrl = envUrl.replace(/\/$/, '');
+  return cleanUrl.endsWith('/api') ? cleanUrl : `${ cleanUrl }/api`;
 };
+
 
 const api = axios.create({
   baseURL: getBaseURL(),

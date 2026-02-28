@@ -1,13 +1,22 @@
 import express from "express";
 import cors from "cors";
+import compression from "compression";
 import courseRoutes from "./routes/course.routes.js";
 import zaraRoutes from "./routes/zara.routes.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 
 const app = express();
 
+app.use(compression()); // Compress all responses
 app.use(cors());
 app.use(express.json());
+
+// Root health check
+app.get("/", (req, res) => {
+    res.json({ message: "Learnify API is online", status: "ok" });
+});
+
+
 
 app.use("/api/courses", courseRoutes);
 app.use("/api/zara", zaraRoutes);

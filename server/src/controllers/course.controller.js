@@ -20,10 +20,15 @@ export const createCourse = async (req, res, next) => {
   }
 };
 
-export const getAllCourses = async (req, res) => {
-  const courses = await Course.find().sort({ createdAt: -1 });
-  res.json(courses);
+export const getAllCourses = async (req, res, next) => {
+  try {
+    const courses = await Course.find().sort({ createdAt: -1 });
+    res.json(courses || []);
+  } catch (error) {
+    next(error);
+  }
 };
+
 
 export const getCourseById = async (req, res) => {
   const course = await Course.findById(req.params.id);
